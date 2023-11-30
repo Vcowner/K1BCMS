@@ -3,7 +3,7 @@
  * @Description:
  * @Date: 2023-11-28 15:24:21
  * @LastEditors: liaokt
- * @LastEditTime: 2023-11-28 16:52:47
+ * @LastEditTime: 2023-11-30 09:47:00
  */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RegisterUserDto } from '@/dtos/user-register.dto';

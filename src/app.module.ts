@@ -3,7 +3,7 @@
  * @Description:
  * @Date: 2023-11-27 16:21:04
  * @LastEditors: liaokt
- * @LastEditTime: 2023-11-28 15:32:20
+ * @LastEditTime: 2023-11-29 10:03:55
  */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -14,6 +14,8 @@ import { RedisModule } from './features/redis/redis.module';
 import { UserModule } from './features/user/user.module';
 import { AuthModule } from './features/auth/auth.module';
 import { dbConfig } from './config/db.config';
+import { CaptchaService } from './features/captcha/captcha.service';
+import { CaptchaModule } from './features/captcha/captcha.module';
 
 @Module({
   imports: [
@@ -27,8 +29,9 @@ import { dbConfig } from './config/db.config';
     RedisModule,
     UserModule,
     AuthModule,
+    CaptchaModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CaptchaService],
 })
 export class AppModule {}

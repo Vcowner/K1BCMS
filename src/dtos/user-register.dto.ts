@@ -1,9 +1,9 @@
 /*
  * @Author: liaokt
- * @Description:
+ * @Description: user register dto
  * @Date: 2023-11-15 14:31:06
  * @LastEditors: liaokt
- * @LastEditTime: 2023-11-28 15:53:15
+ * @LastEditTime: 2023-11-30 09:57:55
  */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
