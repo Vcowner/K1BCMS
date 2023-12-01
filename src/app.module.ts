@@ -3,7 +3,7 @@
  * @Description:
  * @Date: 2023-11-27 16:21:04
  * @LastEditors: liaokt
- * @LastEditTime: 2023-11-29 10:03:55
+ * @LastEditTime: 2023-12-01 17:29:25
  */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -16,10 +16,22 @@ import { AuthModule } from './features/auth/auth.module';
 import { dbConfig } from './config/db.config';
 import { CaptchaService } from './features/captcha/captcha.service';
 import { CaptchaModule } from './features/captcha/captcha.module';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtConfig } from './config/jwt.config';
+import { APP_GUARD } from '@nestjs/core';
+import { LoginGuard } from './guards/login.guard';
+import { PermissionGuard } from './guards/permission.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    JwtModule.registerAsync({
+      global: true,
+      useFactory(configService: ConfigService) {
+        return jwtConfig(configService);
+      },
+      inject: [ConfigService],
+    }),
     TypeOrmModule.forRootAsync({
       useFactory(configService: ConfigService) {
         return dbConfig(configService);
@@ -32,6 +44,17 @@ import { CaptchaModule } from './features/captcha/captcha.module';
     CaptchaModule,
   ],
   controllers: [AppController],
-  providers: [AppService, CaptchaService],
+  providers: [
+    AppService,
+    CaptchaService,
+    {
+      provide: APP_GUARD,
+      useClass: LoginGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
+    },
+  ],
 })
 export class AppModule {}

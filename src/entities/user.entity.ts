@@ -1,3 +1,10 @@
+/*
+ * @Author: liaokt
+ * @Description: User
+ * @Date: 2023-11-28 15:15:04
+ * @LastEditors: liaokt
+ * @LastEditTime: 2023-12-01 15:55:50
+ */
 import {
   Column,
   CreateDateColumn,
@@ -51,7 +58,6 @@ export class User {
   @Column({
     comment: '手机号',
     length: 11,
-    nullable: true,
   })
   phoneNumber: string;
 

@@ -3,16 +3,19 @@
  * @Description:
  * @Date: 2023-11-28 15:24:21
  * @LastEditors: liaokt
- * @LastEditTime: 2023-11-30 09:47:00
+ * @LastEditTime: 2023-12-01 15:55:13
  */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { RegisterUserDto } from '@/dtos/user-register.dto';
 import { UserService } from '../user/user.service';
 import { RedisService } from '../redis/redis.service';
-import { User } from '@/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { md5, throwBadException } from '@/utils';
+import { LoginUserDto } from '@/dtos/user-login.dto';
+import { LoginUserVo } from '@/vo/user-login.vo';
+import { Permission } from '@/entities/permission.entity';
+import { User } from '@/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -75,5 +78,52 @@ export class AuthService {
       this.logger.error(e, UserService);
       return '注册失败';
     }
+  }
+
+  /**
+   * Authenticates a user by logging them in.
+   *
+   * @param {LoginUserDto} loginUserDto - The login details of the user.
+   * @param {boolean} isAdmin - Indicates whether the user is an admin.
+   * @throws {HttpException} Throws an exception if the user does not exist or if the password is incorrect.
+   * @return {Promise<User>} The authenticated user.
+   */
+  async login(loginUserDto: LoginUserDto) {
+    // 1. 查询用户
+    const user = await this.userRepository.findOne({
+      where: {
+        username: loginUserDto.username,
+        isAdmin: loginUserDto.isAdmin,
+      },
+      // 同时查询用户的角色和权限
+      relations: ['roles', 'roles.permissions'],
+    });
+
+    if (!user) {
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+    }
+
+    if (user.password !== md5(loginUserDto.password)) {
+      throw new HttpException('密码错误', HttpStatus.BAD_REQUEST);
+    }
+
+    const loginVo = new LoginUserVo();
+
+    const permissions = new Set<Permission>();
+    user.roles.forEach((role) => {
+      role.permissions.forEach((permission) => {
+        permissions.add(permission);
+      });
+    });
+
+    loginVo.userInfo = {
+      ...user,
+      createTime: user.createTime.getTime(),
+      roles: user.roles.map((item) => item.name),
+      // 当前用户可能会有多个角色，且角色的权限可能会有重复，所以要去下重
+      permissions: Array.from(permissions),
+    };
+
+    return loginVo;
   }
 }
