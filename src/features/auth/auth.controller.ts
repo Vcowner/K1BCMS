@@ -3,12 +3,11 @@
  * @Description: 注册、登录、鉴权模块
  * @Date: 2023-11-28 15:24:21
  * @LastEditors: liaokt
- * @LastEditTime: 2023-12-01 16:09:11
+ * @LastEditTime: 2023-12-04 16:42:09
  */
 import {
   Body,
   Controller,
-  Get,
   HttpStatus,
   Post,
   UnauthorizedException,
@@ -23,13 +22,16 @@ import { RegisterUserDto } from '@/dtos/user-register.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@/entities/user.entity';
 import { Repository } from 'typeorm';
-import { generateToken, md5 } from '@/utils';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { generateToken } from '@/utils';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
 import { RefreshTokenDto } from '@/dtos/token-fresh.dto';
+import { LoginUserVo } from '@/vo/user-login.vo';
+import { RefreshTokenVo } from '@/vo/token-refresh.vo';
 
+@ApiTags('auth-center')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -72,7 +74,7 @@ export class AuthController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '用户信息和 token',
-    type: String,
+    type: LoginUserVo,
   })
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto) {
@@ -116,6 +118,17 @@ export class AuthController {
   }
 
   // 刷新 token
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'token 已失效， 请重新登录',
+    type: String,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'token 已失效， 请重新登录',
+    type: RefreshTokenVo,
+  })
   @Post('refresh-token')
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     try {
@@ -125,7 +138,9 @@ export class AuthController {
 
       const tokens = generateToken(this.jwtService, this.configService, user);
 
-      return tokens;
+      const tokensVo = new RefreshTokenVo(tokens);
+
+      return tokensVo;
     } catch (error) {
       throw new UnauthorizedException('token 已失效， 请重新登录');
     }
