@@ -3,7 +3,7 @@
  * @Description:
  * @Date: 2023-11-27 16:21:04
  * @LastEditors: liaokt
- * @LastEditTime: 2023-12-04 16:43:24
+ * @LastEditTime: 2023-12-06 14:46:52
  */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -13,6 +13,7 @@ import { FormatResponseInterceptor } from './interceptors/format-response.interc
 import { InvokeRecordInterceptor } from './interceptors/invoke-record.interceptor';
 import { CustomExceptionFilter } from './filters/custom-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { WINSTON_LOGGER_TOKEN } from './features/winston/winston.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,6 +26,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new InvokeRecordInterceptor());
 
   app.useGlobalFilters(new CustomExceptionFilter());
+
+  app.useLogger(app.get(WINSTON_LOGGER_TOKEN));
 
   const config = new DocumentBuilder()
     .setTitle('K1B_CMS')

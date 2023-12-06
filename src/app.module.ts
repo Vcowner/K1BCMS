@@ -3,7 +3,7 @@
  * @Description:
  * @Date: 2023-11-27 16:21:04
  * @LastEditors: liaokt
- * @LastEditTime: 2023-12-01 17:29:25
+ * @LastEditTime: 2023-12-06 16:47:50
  */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -21,6 +21,8 @@ import { jwtConfig } from './config/jwt.config';
 import { APP_GUARD } from '@nestjs/core';
 import { LoginGuard } from './guards/login.guard';
 import { PermissionGuard } from './guards/permission.guard';
+import { WinstonModule } from './features/winston/winston.module';
+import { winstonConfig } from './config/logger.config';
 
 @Module({
   imports: [
@@ -38,10 +40,12 @@ import { PermissionGuard } from './guards/permission.guard';
       },
       inject: [ConfigService],
     }),
+    WinstonModule.forRoot(winstonConfig()),
     RedisModule,
     UserModule,
     AuthModule,
     CaptchaModule,
+    WinstonModule,
   ],
   controllers: [AppController],
   providers: [

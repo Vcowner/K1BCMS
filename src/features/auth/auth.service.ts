@@ -3,9 +3,15 @@
  * @Description:
  * @Date: 2023-11-28 15:24:21
  * @LastEditors: liaokt
- * @LastEditTime: 2023-12-01 15:55:13
+ * @LastEditTime: 2023-12-06 15:01:41
  */
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { RegisterUserDto } from '@/dtos/user-register.dto';
 import { UserService } from '../user/user.service';
 import { RedisService } from '../redis/redis.service';
@@ -16,10 +22,12 @@ import { LoginUserDto } from '@/dtos/user-login.dto';
 import { LoginUserVo } from '@/vo/user-login.vo';
 import { Permission } from '@/entities/permission.entity';
 import { User } from '@/entities/user.entity';
+import { WINSTON_LOGGER_TOKEN } from '../winston/winston.module';
 
 @Injectable()
 export class AuthService {
-  private logger = new Logger();
+  @Inject(WINSTON_LOGGER_TOKEN)
+  private logger;
 
   constructor(
     private readonly userService: UserService,
